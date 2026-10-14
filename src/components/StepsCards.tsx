@@ -1,10 +1,10 @@
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 
 
 export function StepCards() {
   return (
     <ScrollView 
-      contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 100, paddingTop: 20 }}
+      contentContainerStyle={{ paddingHorizontal: 20 }}
       showsVerticalScrollIndicator={false}
       className="space-y-4"
     >
