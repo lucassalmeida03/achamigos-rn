@@ -17,6 +17,7 @@ interface HeaderProps {
 export function Header({ isLoggedIn = true }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  isLoggedIn = false
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -120,6 +121,17 @@ export function Header({ isLoggedIn = true }: HeaderProps) {
               ) : (
                 /* OPÇÕES PARA USUÁRIO NÃO LOGADO */
                 <View className="gap-y-1">
+                   <TouchableOpacity
+                    className="flex-row items-center p-3 rounded-xl active:bg-gray-50"
+                    onPress={() => setIsMenuOpen(false)}
+                  >
+                    <Ionicons name="log-in-outline" size={20} color="#4A3728" />
+                    <Text className="ml-3 font-medium text-gray-800 text-sm">
+                      Fazer Login
+                    </Text>
+                  </TouchableOpacity>
+
+
                   <TouchableOpacity
                     className="flex-row items-center p-3 rounded-xl active:bg-gray-50"
                     onPress={() => setIsMenuOpen(false)}
