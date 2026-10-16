@@ -49,18 +49,17 @@ export default function Home() {
 
   return (
     <View className="flex-1 bg-[#F8F9FD]">
-      {/* 1. Header Fixo no Topo */}
+  
       <Header />
 
-      {/* 2. Conteúdo com Scroll */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 110 }}
       >
         <View className="px-5 pt-4 gap-y-6">
-          {/* CARD: OBJETIVO DO ACHAMIGOS */}
+      
           <View className="bg-white rounded-3xl p-6 border border-gray-100/80 shadow-sm">
-            {/* Tag/Badge Superior */}
+         
             <View className="self-start flex-row items-center bg-gray-100/70 px-3 py-1.5 rounded-full mb-4">
               <View className="w-2 h-2 rounded-full bg-[#10B981] mr-2" />
               <Text className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
@@ -68,25 +67,22 @@ export default function Home() {
               </Text>
             </View>
 
-            {/* Título Principal */}
             <Text className="text-2xl font-bold text-[#2C3A4E] leading-tight mb-3">
               Encontre seu novo <Text className="text-orange-500">melhor amigo</Text> com carinho e agilidade
             </Text>
 
-            {/* Descrição */}
             <Text className="text-gray-500 text-lg leading-relaxed mb-6">
               Conectamos você diretamente a abrigos e casas de acolhimento
               parceiras com pets castrados, vacinados e prontos para encher sua
               casa de afeto.
             </Text>
 
-            {/* Botão de Ação usando o teu componente Button */}
             <Button onPress={() => console.log("Explorar pets")}>
               Explorar Pets Disponíveis
             </Button>
           </View>
 
-          {/* CABEÇALHO DO PASSO A PASSO */}
+
           <View className="mt-6 flex items-center justify-center">
             <View className="flex-row items-center mb-1">
               <Ionicons name="git-network-outline" size={20} color="#FF7A00" />
@@ -104,16 +100,13 @@ export default function Home() {
             </Text>
           </View>
 
-          {/* COMPONENTE DOS CARDS DE ETAPAS */}
           <StepCards />
 
-          {/* SECÇÃO: CASAS DE ADOÇÃO */}
           <View className="mt-2">
             <Text className="text-xl font-bold text-[#1E293B] mb-4">
               Casas de Adoção
             </Text>
 
-            {/* Grid 2x2 de Cards */}
             <View className="flex-row flex-wrap justify-between gap-y-4">
               {ADOPTION_HOUSES.map((house) => (
                 <TouchableOpacity
@@ -140,7 +133,7 @@ export default function Home() {
             </View>
           </View>
 
-          {/* SECÇÃO: CANAIS DE CONTACTO E FOOTER */}
+  
           <View className="bg-white rounded-3xl p-6 mb-10 items-center border border-gray-100/60 shadow-sm gap-y-4 mt-2">
             <View className="w-12 h-12 rounded-2xl bg-[#FFEAD8] justify-center items-center">
               <MaterialCommunityIcons
@@ -162,7 +155,7 @@ export default function Home() {
 
             <View className="w-full items-center gap-y-3 mt-1">
               <View className="flex-row justify-center gap-x-3 w-full">
-                {/* Botão WhatsApp */}
+        
                 <TouchableOpacity
                   activeOpacity={0.8}
                   onPress={() => handleOpenLink("https://wa.me/5500000000000")}
@@ -174,7 +167,6 @@ export default function Home() {
                   </Text>
                 </TouchableOpacity>
 
-                {/* Botão Instagram */}
                 <TouchableOpacity
                   activeOpacity={0.8}
                   onPress={() => handleOpenLink("https://instagram.com")}
@@ -187,7 +179,6 @@ export default function Home() {
                 </TouchableOpacity>
               </View>
 
-              {/* Botão Telefone */}
               <TouchableOpacity
                 activeOpacity={0.8}
                 onPress={() => handleOpenLink("tel:0800000000")}

@@ -4,19 +4,30 @@ import { View, Text, TextInput, TextInputProps } from 'react-native';
 interface InputProps extends TextInputProps {
   legend?: string;
   selected?: boolean;
+  error?: string;
+  icon?: React.ReactNode;
 }
 
 export function Input({
   legend,
   selected = false,
+  error,
+  icon,
   className = '',
   onFocus,
   onBlur,
+  multiline,
   ...rest
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
 
   const isSelected = selected || isFocused;
+  const hasValue =
+    typeof rest.value === 'string'
+      ? rest.value.trim().length > 0
+      : typeof rest.defaultValue === 'string' &&
+        rest.defaultValue.trim().length > 0;
+  const showError = Boolean(error) && !isSelected && !hasValue;
 
   return (
     <View className="w-full my-2">
@@ -27,13 +38,25 @@ export function Input({
       )}
 
       <View
-        className={`bg-[#F0F3FF] h-14 rounded-full px-5 justify-center border-2 ${
-          isSelected ? 'border-[#FF7A00]' : 'border-transparent'
+        className={`bg-[#F0F3FF] ${
+          multiline ? 'h-32 py-3 items-start' : 'h-14 items-center'
+        } rounded-3xl px-5 flex-row border-2 ${
+          showError
+            ? 'border-red-500'
+            : isSelected
+            ? 'border-[#FF7A00]'
+            : 'border-transparent'
         }`}
       >
+        {icon && <View className={`mr-3 ${multiline ? 'mt-1' : ''}`}>{icon}</View>}
+
         <TextInput
-          className={`text-gray-800 text-base h-full ${className}`}
+          className={`text-gray-800 text-base flex-1 ${
+            multiline ? 'text-top h-full' : 'h-full'
+          } ${className}`}
           placeholderTextColor="#9CA3AF"
+          multiline={multiline}
+          textAlignVertical={multiline ? 'top' : 'center'}
           onFocus={(e) => {
             setIsFocused(true);
             onFocus && onFocus(e);
@@ -45,6 +68,12 @@ export function Input({
           {...rest}
         />
       </View>
+
+      {showError && (
+        <Text className="text-red-500 text-xs mt-1 ml-3 font-medium">
+          {error}
+        </Text>
+      )}
     </View>
   );
 }
