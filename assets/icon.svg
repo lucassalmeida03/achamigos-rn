@@ -1,0 +1,15 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fundo Redondo Laranja -->
+  <rect width="1024" height="1024" rx="220" fill="#FF7A00"/>
+  
+  <!-- Ícone da Patinha (Branco) -->
+  <g fill="#FFFFFF">
+    <!-- Almofada Central -->
+    <path d="M512 480C420 480 340 560 340 660C340 750 410 820 512 820C614 820 684 750 684 660C684 560 604 480 512 480Z"/>
+    <!-- Dedos -->
+    <circle cx="330" cy="420" r="75"/>
+    <circle cx="450" cy="330" r="75"/>
+    <circle cx="574" cy="330" r="75"/>
+    <circle cx="694" cy="420" r="75"/>
+  </g>
+</svg>

@@ -8,6 +8,7 @@ import {
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 interface HeaderProps {
   /** Substitua ou altere para gerenciar via seu contexto de Auth no futuro */
@@ -16,8 +17,7 @@ interface HeaderProps {
 
 export function Header({ isLoggedIn = true }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  isLoggedIn = false
+  const router = useRouter();
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -78,7 +78,10 @@ export function Header({ isLoggedIn = true }: HeaderProps) {
                 <View className="gap-y-1">
                   <TouchableOpacity
                     className="flex-row items-center p-3 rounded-xl active:bg-orange-50"
-                    onPress={() => setIsMenuOpen(false)}
+                    onPress={() => {
+                      setIsMenuOpen(false);
+                      router.push('/cadastrar-animal');
+                    }}
                   >
                     <Ionicons name="add-circle-outline" size={20} color="#FF7A00" />
                     <Text className="ml-3 font-semibold text-gray-800 text-sm">

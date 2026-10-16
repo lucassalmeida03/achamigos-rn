@@ -68,6 +68,22 @@ export default function TabsLayout() {
           ),
         }}
       />
+
+        <Tabs.Screen
+        name="evento"
+        options={{
+          title: "Evento",
+          tabBarIcon: ({ color }) => (
+            <Image
+              source={require("../../../assets/icons/Evento.png")}
+              style={{ width: 18, height: 18, tintColor: color }}
+              resizeMode="contain"
+            />
+          ),
+        }}
+      />
     </Tabs>
+
+    
   );
 }
