@@ -7,7 +7,7 @@ export const petSchema = z.object({
   sexo: z.enum(['macho', 'femea'], {
     error: 'Selecione o sexo do pet',
   }),
-  raca: z.string().optional(),
+  raca: z.string().min(1, 'Informe a raça ou mistura'),
   porte: z.enum(['pequeno', 'medio', 'grande'], {
     error: 'Selecione o porte do pet',
   }),
@@ -18,9 +18,10 @@ export const petSchema = z.object({
   observacoes: z
     .string()
     .min(10, 'A descrição deve ter pelo menos 10 caracteres'),
-  linkExterno: z
-    .url('Informe um link válido (ex: https://...)')
-    .optional(),
+  linkExterno: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z.url('Informe um link válido (ex: https://...)').optional(),
+  ),
 });
 
 export type PetFormData = z.infer<typeof petSchema>;
