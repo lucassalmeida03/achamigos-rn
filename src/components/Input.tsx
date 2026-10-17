@@ -22,12 +22,7 @@ export function Input({
   const [isFocused, setIsFocused] = useState(false);
 
   const isSelected = selected || isFocused;
-  const hasValue =
-    typeof rest.value === 'string'
-      ? rest.value.trim().length > 0
-      : typeof rest.defaultValue === 'string' &&
-        rest.defaultValue.trim().length > 0;
-  const showError = Boolean(error) && !isSelected && !hasValue;
+  const showError = Boolean(error);
 
   return (
     <View className="w-full my-2">

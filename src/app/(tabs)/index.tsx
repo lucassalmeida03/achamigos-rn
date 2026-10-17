@@ -11,6 +11,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/Button";
 import { StepCards } from "@/components/StepsCards";
+import { useRouter } from "expo-router";
 
 // Dados simulados das Casas de Adoção
 const ADOPTION_HOUSES = [
@@ -40,6 +41,7 @@ const ADOPTION_HOUSES = [
   },
 ];
 
+
 export default function Home() {
   const handleOpenLink = (url: string) => {
     Linking.openURL(url).catch((err) =>
@@ -47,10 +49,11 @@ export default function Home() {
     );
   };
 
+  const router = useRouter();
   return (
     <View className="flex-1 bg-[#F8F9FD]">
   
-      <Header />
+      <Header isLoggedIn={false} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -77,11 +80,10 @@ export default function Home() {
               casa de afeto.
             </Text>
 
-            <Button onPress={() => console.log("Explorar pets")}>
+            <Button onPress={() => router.push("/adotar")}>
               Explorar Pets Disponíveis
             </Button>
           </View>
-
 
           <View className="mt-6 flex items-center justify-center">
             <View className="flex-row items-center mb-1">
