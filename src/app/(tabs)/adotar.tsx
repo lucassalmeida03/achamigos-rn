@@ -1,50 +1,60 @@
-import React from 'react';
-import { View, Text, ScrollView, Image, Linking, Alert } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  Linking,
+  Alert,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from 'expo-router';
 import { Header } from '../../components/Header';
 import { Button } from '../../components/Button';
+import { getAnimalImageUrl, getAnimals, type Animal } from '../../services/animalService';
 
-
-const MOCK_PETS = [
-  {
-    id: '1',
-    nome: 'Thor',
-    racaOuMistura: 'Golden Retriever mestiço',
-    sexo: 'Macho',
-    fotoUrl: 'https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=800&auto=format&fit=crop',
-    idade: '2 anos',
-    porte: 'Grande',
-    peso: '22 kg',
-    observacoes: 'Muito dócil, enérgico e brincalhão. Adora passeios matinais, vacinas em dia',
-    linkAnuncio: 'https://instagram.com/resgate_pet/thor',
-  },
-  {
-    id: '2',
-    nome: 'Mel',
-    racaOuMistura: 'Vira-lata (SRD)',
-    sexo: 'Fêmea',
-    fotoUrl: 'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?q=80&w=800&auto=format&fit=crop',
-    idade: '1 ano',
-    porte: 'Médio',
-    peso: '12 kg',
-    observacoes: 'Resgatada das ruas, muito carinhosa e sociável com outros animais.',
-    linkAnuncio: 'https://instagram.com/resgate_pet/mel',
-  },
-  {
-    id: '3',
-    nome: 'Mel',
-    racaOuMistura: 'Vira-lata (SRD)',
-    sexo: 'Fêmea',
-    fotoUrl: 'https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?q=80&w=800&auto=format&fit=crop',
-    idade: '1 ano',
-    porte: 'Médio',
-    peso: '12 kg',
-    observacoes: 'Resgatada das ruas, muito carinhosa e sociável com outros animais.',
-    linkAnuncio: 'https://instagram.com/resgate_pet/mel',
-  },
-];
+function formatValue(value?: string | number, suffix = '') {
+  return value === undefined || value === null || value === ''
+    ? 'Não informado'
+    : `${value}${suffix}`;
+}
 
 export default function Adotar() {
+  const [animals, setAnimals] = useState<Animal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string>();
+
+  const loadAnimals = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+
+    try {
+      setError(undefined);
+      setAnimals(await getAnimals());
+    } catch (loadError) {
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : 'Não foi possível carregar os animais cadastrados.',
+      );
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      void loadAnimals();
+    }, [loadAnimals]),
+  );
+
   const handleOpenLink = (link?: string) => {
     if (link) {
       Linking.openURL(link).catch(() => {
@@ -56,7 +66,16 @@ export default function Adotar() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-100">
+    <ScrollView
+      className="flex-1 bg-gray-100"
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={() => void loadAnimals(true)}
+          tintColor="#FF7A00"
+        />
+      }
+    >
       <Header />
 
       <View className="p-4 mb-24">
@@ -70,23 +89,42 @@ export default function Adotar() {
 
           <View className="bg-[#FCE8E6] px-3 py-1.5 rounded-full">
             <Text className="text-[#C2410C] font-bold text-xs">
-              {MOCK_PETS.length} encontrados
+              {animals.length} encontrados
             </Text>
           </View>
         </View>
 
-        {MOCK_PETS.map((pet) => (
+        {loading ? (
+          <ActivityIndicator color="#FF7A00" size="large" className="mt-10" />
+        ) : error ? (
+          <View className="bg-white rounded-2xl p-5 items-center">
+            <Text className="text-gray-700 text-center mb-3">{error}</Text>
+            <Button onPress={() => void loadAnimals()}>Tentar novamente</Button>
+          </View>
+        ) : animals.length === 0 ? (
+          <View className="bg-white rounded-2xl p-5 items-center">
+            <Text className="text-gray-700 text-center">
+              Nenhum animal cadastrado no momento.
+            </Text>
+          </View>
+        ) : animals.map((pet) => (
           <View
-            key={pet.id}
+            key={pet._id}
             className="bg-white rounded-[28px] p-4 mb-10 shadow-sm border border-gray-100"
           >
 
             <View className="relative w-full h-64 rounded-2xl overflow-hidden mb-3">
-              <Image
-                source={{ uri: pet.fotoUrl }}
-                className="w-full h-full"
-                resizeMode="cover"
-              />
+              {getAnimalImageUrl(pet.imagem) ? (
+                <Image
+                  source={{ uri: getAnimalImageUrl(pet.imagem) }}
+                  className="w-full h-full"
+                  resizeMode="cover"
+                />
+              ) : (
+                <View className="w-full h-full bg-[#F0F3FF] items-center justify-center">
+                  <Ionicons name="paw" size={48} color="#FF7A00" />
+                </View>
+              )}
 
               <View className="absolute bottom-0 left-0 right-0 p-4 bg-black/40 flex-row justify-between items-end">
                 <View className="flex-1 mr-2">
@@ -94,18 +132,18 @@ export default function Adotar() {
                     {pet.nome}
                   </Text>
                   <Text className="text-white/90 text-xs font-medium">
-                    {pet.racaOuMistura}
+                    {pet.raca || pet.tipo || 'Raça não informada'}
                   </Text>
                 </View>
 
                 <View className="bg-white px-3 py-1.5 rounded-full flex-row items-center">
                   <Ionicons
-                    name={pet.sexo === 'Macho' ? 'male' : 'female'}
+                    name={pet.sexo === 'macho' ? 'male' : 'female'}
                     size={14}
                     color="#0052CC"
                   />
                   <Text className="text-[#0052CC] font-bold text-xs ml-1">
-                    {pet.sexo}
+                    {pet.sexo === 'macho' ? 'Macho' : 'Fêmea'}
                   </Text>
                 </View>
               </View>
@@ -115,17 +153,23 @@ export default function Adotar() {
             <View className="flex-row gap-2 mb-3">
               <View className="flex-1 bg-[#F0F3FF] p-2.5 rounded-2xl items-center justify-center">
                 <Text className="text-gray-400 text-[10px] font-medium">Idade</Text>
-                <Text className="text-gray-900 font-bold text-sm">{pet.idade}</Text>
+                <Text className="text-gray-900 font-bold text-sm">
+                  {formatValue(pet.idade, ' anos')}
+                </Text>
               </View>
 
               <View className="flex-1 bg-[#F0F3FF] p-2.5 rounded-2xl items-center justify-center">
                 <Text className="text-gray-400 text-[10px] font-medium">Porte</Text>
-                <Text className="text-gray-900 font-bold text-sm">{pet.porte}</Text>
+                <Text className="text-gray-900 font-bold text-sm">
+                  {pet.porte || 'Não informado'}
+                </Text>
               </View>
 
               <View className="flex-1 bg-[#F0F3FF] p-2.5 rounded-2xl items-center justify-center">
                 <Text className="text-gray-400 text-[10px] font-medium">Peso</Text>
-                <Text className="text-gray-900 font-bold text-sm">{pet.peso}</Text>
+                <Text className="text-gray-900 font-bold text-sm">
+                  {formatValue(pet.peso, ' kg')}
+                </Text>
               </View>
             </View>
 
@@ -145,7 +189,7 @@ export default function Adotar() {
             )}
 
 
-            <Button onPress={() => handleOpenLink(pet.linkAnuncio)}>
+            <Button onPress={() => handleOpenLink(pet.linkAnimal)}>
               Acesse o link do anúncio
             </Button>
           </View>

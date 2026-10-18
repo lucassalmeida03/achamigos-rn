@@ -8,7 +8,7 @@ export default function RegisterPartnerPage() {
   return (
     <ScrollView className="flex-1 bg-gray-100">
   
-      <Header isLoggedIn={true} hideRegisterAction />
+      <Header hideRegisterAction />
 
       <View className="p-4">
     

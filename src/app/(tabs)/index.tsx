@@ -53,7 +53,7 @@ export default function Home() {
   return (
     <View className="flex-1 bg-[#F8F9FD]">
   
-      <Header isLoggedIn={false} />
+      <Header />
 
       <ScrollView
         showsVerticalScrollIndicator={false}

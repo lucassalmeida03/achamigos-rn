@@ -12,7 +12,7 @@ export default function RegisterEventPage() {
   return (
     <ScrollView className="flex-1 bg-gray-100">
 
-      <Header isLoggedIn={true} />
+      <Header />
 
       <View className="p-4">
 

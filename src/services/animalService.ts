@@ -2,6 +2,21 @@ import { getAuthSession } from './authStorage';
 import type { PetFormData } from '../schemas/petSchema';
 
 const API_URL = 'https://achamigos-backend-latest.onrender.com/api';
+const API_ORIGIN = 'https://achamigos-backend-latest.onrender.com';
+
+export type Animal = {
+  _id: string;
+  nome: string;
+  idade?: number;
+  raca?: string;
+  sexo: string;
+  porte?: string;
+  peso?: number | string;
+  observacoes?: string;
+  linkAnimal?: string;
+  imagem?: string | null;
+  tipo?: string;
+};
 
 type JwtPayload = {
   sub?: string;
@@ -31,6 +46,44 @@ function getImageType(uri: string) {
   }
 
   return 'image/jpeg';
+}
+
+export function getAnimalImageUrl(image?: string | null) {
+  if (!image) {
+    return undefined;
+  }
+
+  return image.startsWith('http') ? image : `${API_ORIGIN}${image}`;
+}
+
+export async function getAnimals(): Promise<Animal[]> {
+  let response: Response;
+
+  try {
+    response = await fetch(`${API_URL}/animais`);
+  } catch {
+    throw new Error(
+      'Não foi possível conectar ao backend. Verifique sua internet e tente novamente.',
+    );
+  }
+
+  if (!response.ok) {
+    throw new Error('Não foi possível carregar os animais cadastrados.');
+  }
+
+  let animals: unknown;
+
+  try {
+    animals = await response.json();
+  } catch {
+    throw new Error('O servidor retornou uma lista de animais inválida.');
+  }
+
+  if (!Array.isArray(animals)) {
+    throw new Error('O servidor retornou uma lista de animais inválida.');
+  }
+
+  return animals as Animal[];
 }
 
 export async function createAnimal(data: PetFormData) {

@@ -9,25 +9,25 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useAuth } from '../contexts/AuthContext';
 
 interface HeaderProps {
-  isLoggedIn?: boolean;
   hideLoginAction?: boolean;
   hideRegisterAction?: boolean;
 }
 
 export function Header({
-  isLoggedIn = true,
   hideLoginAction = false,
   hideRegisterAction = false,
 }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
+  const { session, signOut } = useAuth();
+  const isLoggedIn = Boolean(session);
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  isLoggedIn = true
   return (
     <View className="relative z-50 w-full bg-[#F8F9FD] pt-12 pb-4 px-6 border-b border-gray-100">
       <View className="flex-row items-center justify-between">
@@ -52,6 +52,7 @@ export function Header({
               className="w-12 h-12 rounded-full"
             />
           </TouchableOpacity>
+
         ) : (
           <TouchableOpacity
             onPress={toggleMenu}
@@ -125,6 +126,19 @@ export function Header({
                     <Ionicons name="calendar-outline" size={20} color="#6B7280" />
                     <Text className="ml-3 font-medium text-gray-700 text-sm">
                       Eventos
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    className="flex-row items-center p-3 rounded-xl active:bg-red-50"
+                    onPress={() => {
+                      setIsMenuOpen(false);
+                      void signOut().then(() => router.replace('/login'));
+                    }}
+                  >
+                    <Ionicons name="log-out-outline" size={20} color="#DC2626" />
+                    <Text className="ml-3 font-medium text-red-600 text-sm">
+                      Sair
                     </Text>
                   </TouchableOpacity>
                 </View>
