@@ -1,0 +1,20 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Iniciar Expo",
+			"type": "shell",
+			"command": "npm run start",
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Instalar dependências",
+			"type": "shell",
+			"command": "npm install",
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
+}

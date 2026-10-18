@@ -7,6 +7,7 @@ import { Button } from './Button';
 import { SelectOptionGroup } from './SelectOptionGroup';
 import { petSchema } from '../schemas/petSchema';
 import { formatZodErrors } from '../utils/formatZodErrors';
+import { createAnimal } from '../services/animalService';
 
 export function RegisterPetForm() {
 
@@ -25,6 +26,9 @@ export function RegisterPetForm() {
   const [linkExterno, setLinkExterno] = useState('');
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState('');
+  const [submitMessageType, setSubmitMessageType] = useState<'error' | 'success' | null>(null);
 
   const handlePickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -48,6 +52,8 @@ export function RegisterPetForm() {
 
   const handleSubmit = async () => {
     setErrors({});
+    setSubmitMessage('');
+    setSubmitMessageType(null);
 
     const formData = {
       fotoUri,
@@ -66,24 +72,50 @@ export function RegisterPetForm() {
     const result = petSchema.safeParse(formData);
 
     if (!result.success) {
-      setErrors(formatZodErrors(result.error));
+      const validationErrors = formatZodErrors(result.error);
+      setErrors(validationErrors);
+      setSubmitMessage(
+        Object.values(validationErrors)[0] ?? 'Preencha os campos obrigatórios.',
+      );
+      setSubmitMessageType('error');
+      Alert.alert(
+        'Revise os dados',
+        Object.values(validationErrors)[0] ?? 'Preencha os campos obrigatórios.',
+      );
       return;
     }
 
-    console.log('Dados do Pet validados:', result.data);
-    Alert.alert('Sucesso', 'Pet publicado para adoção!');
+    setIsSubmitting(true);
 
-    setFotoUri('');
-    setNome('');
-    setEspecie('');
-    setSexo('macho');
-    setRaca('');
-    setPorte('medio');
-    setIdade(0);
-    setPeso('');
-    setCastrado(true);
-    setObservacoes('');
-    setLinkExterno('');
+    try {
+      await createAnimal(result.data);
+      setSubmitMessage('Pet publicado para adoção!');
+      setSubmitMessageType('success');
+      Alert.alert('Sucesso', 'Pet publicado para adoção!');
+
+      setFotoUri('');
+      setNome('');
+      setEspecie('');
+      setSexo('macho');
+      setRaca('');
+      setPorte('medio');
+      setIdade(0);
+      setPeso('');
+      setCastrado(true);
+      setObservacoes('');
+      setLinkExterno('');
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível cadastrar o animal.';
+      setSubmitMessage(message);
+      setSubmitMessageType('error');
+      console.error('Erro ao cadastrar animal:', error);
+      Alert.alert('Erro ao cadastrar', message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -334,8 +366,25 @@ export function RegisterPetForm() {
       </View>
 
       <View className="mb-12">
-        <Button onPress={handleSubmit}>
-          Publicar Pet para Adoção
+        {submitMessage ? (
+          <View
+            className={`mb-3 rounded-2xl p-4 ${
+              submitMessageType === 'success' ? 'bg-green-100' : 'bg-red-100'
+            }`}
+          >
+            <Text
+              className={
+                submitMessageType === 'success'
+                  ? 'font-medium text-green-800'
+                  : 'font-medium text-red-800'
+              }
+            >
+              {submitMessage}
+            </Text>
+          </View>
+        ) : null}
+        <Button onPress={handleSubmit} disabled={isSubmitting}>
+          {isSubmitting ? 'Publicando...' : 'Publicar Pet para Adoção'}
         </Button>
       </View>
     </ScrollView>
