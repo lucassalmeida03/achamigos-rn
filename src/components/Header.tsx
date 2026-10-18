@@ -27,7 +27,7 @@ export function Header({
     setIsMenuOpen(!isMenuOpen);
   };
 
-  isLoggedIn = false
+  isLoggedIn = true
   return (
     <View className="relative z-50 w-full bg-[#F8F9FD] pt-12 pb-4 px-6 border-b border-gray-100">
       <View className="flex-row items-center justify-between">
@@ -90,7 +90,8 @@ export function Header({
                   <TouchableOpacity
                     className="flex-row items-center p-3 rounded-xl active:bg-orange-50"
                     onPress={() => {
-                      setIsMenuOpen(false);
+                      setIsMenuOpen(false),
+                      router.push('/cadastrar-evento');
                     }}
                   >
                     <Ionicons name="megaphone-outline" size={20} color="#FF7A00" />

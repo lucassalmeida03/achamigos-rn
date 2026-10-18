@@ -13,7 +13,7 @@ import { Button } from "@/components/Button";
 import { StepCards } from "@/components/StepsCards";
 import { useRouter } from "expo-router";
 
-// Dados simulados das Casas de Adoção
+
 const ADOPTION_HOUSES = [
   {
     id: "1",

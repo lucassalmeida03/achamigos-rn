@@ -9,7 +9,6 @@ export function StepCards() {
       className="space-y-4"
     >
 
-
       <View className="bg-blue-600 rounded-3xl p-5 mb-4 shadow-sm">
         <View className="flex-row justify-between items-center mb-4">
           <View className="w-12 h-12 rounded-2xl bg-white/20 items-center justify-center">

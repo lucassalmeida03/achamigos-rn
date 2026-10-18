@@ -54,21 +54,6 @@ export default function TabsLayout() {
         }}
       />
 
-
-      <Tabs.Screen
-        name="perfil"
-        options={{
-          title: "Perfil",
-          tabBarIcon: ({ color }) => (
-            <Image
-              source={require("../../../assets/icons/perfil.png")}
-              style={{ width: 18, height: 18, tintColor: color }}
-              resizeMode="contain"
-            />
-          ),
-        }}
-      />
-
         <Tabs.Screen
         name="evento"
         options={{
