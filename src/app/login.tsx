@@ -84,6 +84,7 @@ export default function Login() {
             value={senha}
             onChangeText={setSenha}
             error={errors.senha}
+            secureTextEntry
             icon={<Ionicons name="lock-closed-outline" size={20} color="#4B5563" />}
           />
 

@@ -13,6 +13,7 @@ export default function RegisterPartnerForm() {
   const [cnpj, setCnpj] = useState('');
   const [telefone, setTelefone] = useState('');
   const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
   const [siteRedeSocial, setSiteRedeSocial] = useState('');
   const [cep, setCep] = useState('');
   const [rua, setRua] = useState('');
@@ -131,6 +132,17 @@ export default function RegisterPartnerForm() {
           keyboardType="email-address"
           error={errors.email}
           icon={<Ionicons name="mail-outline" size={20} color="#4B5563" />}
+        />
+
+        <Input
+          legend="Senha *"
+          placeholder="Digite sua senha"
+          value={senha}
+          onChangeText={setSenha}
+          autoCapitalize="none"
+          secureTextEntry
+          error={errors.senha}
+          icon={<Ionicons name="lock-closed-outline" size={20} color="#4B5563" />}
         />
 
     

@@ -1,6 +1,6 @@
 import { saveAuthSession, type AuthSession } from './authStorage';
 
-const API_URL = 'https://achamigos-backend-latest.onrender.com/api';
+const API_URL = 'http://192.168.30.68:3002/api';
 
 type LoginResponse = AuthSession;
 
