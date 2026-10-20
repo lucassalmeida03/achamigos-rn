@@ -1,6 +1,5 @@
 import { saveAuthSession, type AuthSession } from './authStorage';
-
-const API_URL = 'http://192.168.15.9:3002/api';
+import { API_URL } from '../constants/api';
 
 type LoginResponse = AuthSession;
 

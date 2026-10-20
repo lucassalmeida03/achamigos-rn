@@ -2,6 +2,8 @@ import { z } from 'zod';
 
 export const petSchema = z.object({
   fotoUri: z.string().optional(),
+  fotoNome: z.string().optional(),
+  fotoTipo: z.string().optional(),
   nome: z.string().min(2, 'Informe o nome do pet'),
   especie: z.string().min(1, 'Informe a espécie do pet'),
   sexo: z.enum(['macho', 'femea'], {

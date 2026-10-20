@@ -1,8 +1,7 @@
 import { getAuthSession } from './authStorage';
 import type { PetFormData } from '../schemas/petSchema';
-
-const API_URL = 'http://192.168.15.9:3002/api';
-const API_ORIGIN = 'http://192.168.15.9:3002/api';
+import { API_ORIGIN, API_URL } from '../constants/api';
+import { Platform } from 'react-native';
 
 export type Animal = {
   _id: string;
@@ -39,13 +38,23 @@ function getUserIdFromToken(token: string) {
 }
 
 function getImageType(uri: string) {
-  const extension = uri.split('.').pop()?.toLowerCase();
+  const extension = uri.split(/[?#]/)[0].split('.').pop()?.toLowerCase();
 
   if (extension === 'png') {
     return 'image/png';
   }
 
   return 'image/jpeg';
+}
+
+function getImageExtension(uri: string, fileName?: string) {
+  const fileNameExtension = fileName?.split(/[?#]/)[0].split('.').pop()?.toLowerCase();
+  if (fileNameExtension && /^[a-z0-9]+$/.test(fileNameExtension)) {
+    return fileNameExtension;
+  }
+
+  const extension = uri.split(/[?#]/)[0].split('.').pop()?.toLowerCase();
+  return extension === 'png' ? 'png' : 'jpg';
 }
 
 export function getAnimalImageUrl(image?: string | null) {
@@ -113,13 +122,37 @@ export async function createAnimal(data: PetFormData) {
   body.append('userId', userId);
 
   if (data.fotoUri) {
-    const image = {
-      uri: data.fotoUri,
-      name: `animal-${Date.now()}.jpg`,
-      type: getImageType(data.fotoUri),
-    };
+    const extension = getImageExtension(data.fotoUri, data.fotoNome);
+    const fileName = data.fotoNome?.includes('.')
+      ? data.fotoNome
+      : `${data.fotoNome ?? `animal-${Date.now()}`}.${extension}`;
+    const fileType = data.fotoTipo ?? getImageType(data.fotoUri);
 
-    body.append('imagem', image as unknown as Blob);
+    if (Platform.OS === 'web') {
+      let imageResponse: Response;
+
+      try {
+        imageResponse = await fetch(data.fotoUri);
+      } catch {
+        throw new Error('Não foi possível ler a imagem selecionada.');
+      }
+
+      if (!imageResponse.ok) {
+        throw new Error('Não foi possível ler a imagem selecionada.');
+      }
+
+      const imageBlob = await imageResponse.blob();
+      body.append('imagem', imageBlob, fileName);
+    } else {
+      body.append(
+        'imagem',
+        {
+          uri: data.fotoUri,
+          name: fileName,
+          type: fileType,
+        } as unknown as Blob,
+      );
+    }
   }
 
   let response: Response;

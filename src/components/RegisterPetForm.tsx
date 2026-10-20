@@ -12,6 +12,8 @@ import { createAnimal } from '../services/animalService';
 export function RegisterPetForm() {
 
   const [fotoUri, setFotoUri] = useState<string>('');
+  const [fotoNome, setFotoNome] = useState<string>();
+  const [fotoTipo, setFotoTipo] = useState<string>();
   const [nome, setNome] = useState('');
   const [especie, setEspecie] = useState('');
   const [sexo, setSexo] = useState<'macho' | 'femea' | ''>('macho');
@@ -46,7 +48,10 @@ export function RegisterPetForm() {
     });
 
     if (!result.canceled && result.assets[0].uri) {
-      setFotoUri(result.assets[0].uri);
+      const asset = result.assets[0];
+      setFotoUri(asset.uri);
+      setFotoNome(asset.fileName ?? undefined);
+      setFotoTipo(asset.mimeType ?? undefined);
     }
   };
 
@@ -57,6 +62,8 @@ export function RegisterPetForm() {
 
     const formData = {
       fotoUri,
+      fotoNome,
+      fotoTipo,
       nome,
       especie,
       sexo,
@@ -94,6 +101,8 @@ export function RegisterPetForm() {
       Alert.alert('Sucesso', 'Pet publicado para adoção!');
 
       setFotoUri('');
+      setFotoNome(undefined);
+      setFotoTipo(undefined);
       setNome('');
       setEspecie('');
       setSexo('macho');
