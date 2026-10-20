@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
+import { View, Text, ScrollView, Pressable, Alert, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Input } from './Input';
@@ -7,6 +7,7 @@ import { Button } from './Button';
 import { partnerSchema } from '@/schemas/partnerSchema';
 import { formatZodErrors } from '@/utils/formatZodErrors';
 import { useRouter } from 'expo-router';
+import { createUser } from '../services/userService';
 
 export default function RegisterPartnerForm() {
   const [nomeOng, setNomeOng] = useState('');
@@ -20,6 +21,8 @@ export default function RegisterPartnerForm() {
   const [numero, setNumero] = useState('');
   const [cidadeUf, setCidadeUf] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const handleBuscarCep = async () => {
     const cleanCep = cep.replace(/\D/g, '');
@@ -45,7 +48,7 @@ export default function RegisterPartnerForm() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setErrors({});
 
     const formData = {
@@ -53,6 +56,7 @@ export default function RegisterPartnerForm() {
       cnpj,
       telefone,
       email,
+      senha,
       siteRedeSocial,
       cep,
       rua,
@@ -67,11 +71,40 @@ export default function RegisterPartnerForm() {
       return;
     }
 
-    console.log('Dados do Parceiro Validados:', result.data);
-    Alert.alert('Sucesso', 'Cadastro de parceiro realizado com sucesso!');
+    setIsSubmitting(true);
+
+    try {
+      await createUser({
+        nome: result.data.nomeOng,
+        cnpj: result.data.cnpj,
+        telefone: result.data.telefone,
+        userLogin: result.data.email,
+        senha: result.data.senha,
+        email: result.data.email,
+        endereco: {
+          cep: result.data.cep,
+          rua: result.data.rua,
+          cidade: result.data.cidadeUf,
+          numero: result.data.numero,
+        },
+        linkUser: result.data.siteRedeSocial || undefined,
+      });
+
+      Alert.alert('Sucesso', 'Cadastro de parceiro realizado com sucesso!', [
+        { text: 'OK', onPress: () => router.push('/login') },
+      ]);
+    } catch (error) {
+      Alert.alert(
+        'Erro',
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível cadastrar o usuário. Tente novamente.',
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const router = useRouter();
   return (
     <ScrollView className="flex-1 bg-gray-100 p-4">
      
@@ -241,8 +274,12 @@ export default function RegisterPartnerForm() {
       </View>
 
 
-      <Button onPress={handleSubmit}>
-        Finalizar Cadastro de Parceiro
+      <Button onPress={handleSubmit} disabled={isSubmitting}>
+        {isSubmitting ? (
+          <ActivityIndicator color="#FFFFFF" />
+        ) : (
+          'Finalizar Cadastro de Parceiro'
+        )}
       </Button>
 
       <View className="flex-row justify-center items-center my-6 pb-4">

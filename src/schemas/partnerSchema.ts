@@ -13,6 +13,7 @@ export const partnerSchema = z.object({
   email: z
     .email('Digite um e-mail válido')
     .min(1, 'O e-mail é obrigatório'),
+  senha: z.string().min(1, 'A senha é obrigatória'),
   siteRedeSocial: z
     .url('Informe um link válido (ex: https://...)')
     .or(z.literal(''))

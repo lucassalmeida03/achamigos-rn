@@ -1,8 +1,8 @@
 import { getAuthSession } from './authStorage';
 import type { PetFormData } from '../schemas/petSchema';
 
-const API_URL = 'http://192.168.30.68:3002/api';
-const API_ORIGIN = 'http://192.168.30.68:3002/api';
+const API_URL = 'http://192.168.15.9:3002/api';
+const API_ORIGIN = 'http://192.168.15.9:3002/api';
 
 export type Animal = {
   _id: string;
