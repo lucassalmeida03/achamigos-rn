@@ -47,7 +47,7 @@ export function Header({
           >
             <Image
               source={{
-                uri: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200',
+                uri: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=256&h=256&q=85',
               }}
               className="w-12 h-12 rounded-full"
             />
