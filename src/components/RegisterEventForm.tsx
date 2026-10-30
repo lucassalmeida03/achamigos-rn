@@ -7,6 +7,7 @@ import { Input } from './Input';
 import { Button } from './Button';
 import { eventSchema } from '../schemas/eventSchema';
 import { formatZodErrors } from '../utils/formatZodErrors';
+import { createEvent } from '../services/eventService';
 
 export function RegisterEventForm() {
 
@@ -20,6 +21,7 @@ export function RegisterEventForm() {
   const [linkExterno, setLinkExterno] = useState('');
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const handlePickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -41,7 +43,7 @@ export function RegisterEventForm() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setErrors({});
 
     const formData = {
@@ -62,8 +64,15 @@ export function RegisterEventForm() {
       return;
     }
 
-    console.log('Dados do Evento validados:', result.data);
-    Alert.alert('Sucesso', 'Evento publicado com sucesso!');
+    setIsSubmitting(true);
+    try {
+      await createEvent(result.data);
+      Alert.alert('Sucesso', 'Evento publicado com sucesso!');
+    } catch (error) {
+      Alert.alert('Erro', error instanceof Error ? error.message : 'Não foi possível publicar o evento.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -222,8 +231,8 @@ export function RegisterEventForm() {
 
 
       <View className="mb-12">
-        <Button onPress={handleSubmit}>
-          Publicar Evento
+        <Button onPress={handleSubmit} disabled={isSubmitting}>
+          {isSubmitting ? 'Publicando...' : 'Publicar Evento'}
         </Button>
       </View>
     </View>

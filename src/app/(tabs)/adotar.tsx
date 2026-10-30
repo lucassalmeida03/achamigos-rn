@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Alert,
   ActivityIndicator,
   RefreshControl,
+  Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
@@ -26,6 +27,13 @@ export default function Adotar() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string>();
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    tipo: [] as string[],
+    porte: [] as string[],
+    castrado: [] as string[],
+    idade: [] as string[],
+  });
 
   const loadAnimals = useCallback(async (isRefresh = false) => {
     if (isRefresh) {
@@ -65,6 +73,57 @@ export default function Adotar() {
     }
   };
 
+  const toggleFilter = (category: keyof typeof filters, value: string) => {
+    setFilters((current) => {
+      const values = current[category];
+      return {
+        ...current,
+        [category]: values.includes(value)
+          ? values.filter((item) => item !== value)
+          : [...values, value],
+      };
+    });
+  };
+
+  const filteredAnimals = useMemo(() => animals.filter((animal) => {
+    const tipo = (animal.tipo ?? '').toLowerCase();
+    const porte = (animal.porte ?? '').toLowerCase();
+    const castrado = animal.castracao ? 'sim' : 'nao';
+    const idade = typeof animal.idade === 'number' && animal.idade <= 10 ? '0-10 anos' : '10 anos+';
+    return (
+      (!filters.tipo.length || filters.tipo.includes(tipo)) &&
+      (!filters.porte.length || filters.porte.includes(porte)) &&
+      (!filters.castrado.length || filters.castrado.includes(castrado)) &&
+      (!filters.idade.length || filters.idade.includes(idade))
+    );
+  }), [animals, filters]);
+
+  const clearFilters = () => setFilters({ tipo: [], porte: [], castrado: [], idade: [] });
+
+  const renderFilterGroup = (
+    title: string,
+    category: keyof typeof filters,
+    options: { label: string; value: string }[],
+  ) => (
+    <View className="mb-3">
+      <Text className="text-gray-800 font-bold mb-2">{title}</Text>
+      <View className="flex-row flex-wrap gap-2">
+        {options.map((option) => {
+          const selected = filters[category].includes(option.value);
+          return (
+            <Pressable
+              key={option.value}
+              onPress={() => toggleFilter(category, option.value)}
+              className={`px-3 py-2 rounded-full border ${selected ? 'bg-[#FF7A00] border-[#FF7A00]' : 'bg-white border-gray-200'}`}
+            >
+              <Text className={selected ? 'text-white font-semibold' : 'text-gray-700'}>{option.label}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+
   return (
     <ScrollView
       className="flex-1 bg-gray-100"
@@ -89,9 +148,44 @@ export default function Adotar() {
 
           <View className="bg-[#FCE8E6] px-3 py-1.5 rounded-full">
             <Text className="text-[#C2410C] font-bold text-xs">
-              {animals.length} encontrados
+              {filteredAnimals.length} encontrados
             </Text>
           </View>
+        </View>
+
+        <View className="bg-white rounded-2xl p-4 mb-5 border border-gray-100">
+          <Pressable onPress={() => setFiltersOpen((open) => !open)} className="flex-row justify-between items-center">
+            <View className="flex-row items-center">
+              <Ionicons name="options-outline" size={21} color="#FF7A00" />
+              <Text className="text-gray-900 font-bold ml-2">Filtros</Text>
+            </View>
+            <Ionicons name={filtersOpen ? 'chevron-up' : 'chevron-down'} size={20} color="#4B5563" />
+          </Pressable>
+          {filtersOpen ? (
+            <View className="mt-4">
+              {renderFilterGroup('Animais', 'tipo', [
+                { label: 'Gato', value: 'gato' },
+                { label: 'Cachorro', value: 'cachorro' },
+                { label: 'Outro', value: 'outro' },
+              ])}
+              {renderFilterGroup('Porte', 'porte', [
+                { label: 'Pequeno', value: 'pequeno' },
+                { label: 'Médio', value: 'medio' },
+                { label: 'Grande', value: 'grande' },
+              ])}
+              {renderFilterGroup('Castrado', 'castrado', [
+                { label: 'Sim', value: 'sim' },
+                { label: 'Não', value: 'nao' },
+              ])}
+              {renderFilterGroup('Idade', 'idade', [
+                { label: '0-10 anos', value: '0-10 anos' },
+                { label: '10 anos+', value: '10 anos+' },
+              ])}
+              <Pressable onPress={clearFilters} className="items-center py-2">
+                <Text className="text-[#0052CC] font-semibold">Limpar filtros</Text>
+              </Pressable>
+            </View>
+          ) : null}
         </View>
 
         {loading ? (
@@ -101,13 +195,13 @@ export default function Adotar() {
             <Text className="text-gray-700 text-center mb-3">{error}</Text>
             <Button onPress={() => void loadAnimals()}>Tentar novamente</Button>
           </View>
-        ) : animals.length === 0 ? (
+        ) : filteredAnimals.length === 0 ? (
           <View className="bg-white rounded-2xl p-5 items-center">
             <Text className="text-gray-700 text-center">
-              Nenhum animal cadastrado no momento.
+              {animals.length === 0 ? 'Nenhum animal cadastrado no momento.' : 'Nenhum animal corresponde aos filtros selecionados.'}
             </Text>
           </View>
-        ) : animals.map((pet) => (
+        ) : filteredAnimals.map((pet) => (
           <View
             key={pet._id}
             className="bg-white rounded-[28px] p-4 mb-10 shadow-sm border border-gray-100"

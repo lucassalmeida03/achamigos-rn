@@ -10,7 +10,8 @@ export const eventSchema = z.object({
   orientacoes: z
     .string()
     .min(10, 'As orientações devem ter pelo menos 10 caracteres'),
-  linkExterno: z
-    .url('Informe um link válido (ex: https://...)')
-    .optional(),
+  linkExterno: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z.url('Informe um link válido (ex: https://...)').optional(),
+  ),
 });

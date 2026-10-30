@@ -1,35 +1,26 @@
-import React from 'react';
-import { View, Text, ScrollView, Image, Pressable, Linking, Alert } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, Text, ScrollView, Image, Pressable, Linking, Alert, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from 'expo-router';
 import { Header } from '../../components/Header';
-
-
-const MOCK_EVENTS = [
-  {
-    id: '1',
-    dataHora: '18 de Maio, 2025 • 09:00 às 15:00',
-    titulo: 'Feira de Adoção de Domingo no Parque',
-    local: 'Parque Ibirapuera - Portão 7, São Paulo',
-    descricao:
-      'Traga documento com foto e comprovante de residência. Mais de 40 pets resgatados (cães e gatinhos filhotes e adultos) vacinados,...',
-    fotoUrl:
-      'https://images.unsplash.com/photo-1576201836106-db1758fd1c97?q=80&w=800&auto=format&fit=crop',
-    linkMaisInfo: 'https://instagram.com/resgate_pet/evento-1',
-  },
-  {
-    id: '2',
-    dataHora: '25 de Maio, 2025 • 10:00 às 16:00',
-    titulo: 'Encontro de Adoção e Arrecadação de Ração',
-    local: 'Praça da Liberdade, São Paulo',
-    descricao:
-      'Venha conhecer nossos pets e traga 1kg de ração para ajudar os abrigos parceiros. Haverá orientação com veterinários no local.',
-    fotoUrl:
-      'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=800&auto=format&fit=crop',
-    linkMaisInfo: 'https://instagram.com/resgate_pet/evento-2',
-  },
-];
+import { getEvents, getImageUrl, type EventItem } from '../../services/eventService';
 
 export default function EventsScreen() {
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string>();
+  const loadEvents = useCallback(async (refresh = false) => {
+    if (refresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+    try { setEvents(await getEvents()); setError(undefined); }
+    catch (err) { setError(err instanceof Error ? err.message : 'Não foi possível carregar os eventos.'); }
+    finally { setLoading(false); setRefreshing(false); }
+  }, []);
+  useFocusEffect(useCallback(() => { void loadEvents(); }, [loadEvents]));
   const handleOpenLink = (link?: string) => {
     if (link) {
       Linking.openURL(link).catch(() => {
@@ -41,7 +32,7 @@ export default function EventsScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-100">
+    <ScrollView className="flex-1 bg-gray-100" refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void loadEvents(true)} />}>
   
       <Header />
 
@@ -67,16 +58,18 @@ export default function EventsScreen() {
         </View>
 
 
-        {MOCK_EVENTS.map((evento) => (
+        {loading ? <ActivityIndicator color="#FF7A00" size="large" /> : error ? (
+          <View className="bg-white p-5 rounded-2xl"><Text>{error}</Text></View>
+        ) : events.length === 0 ? <Text className="text-gray-600">Nenhum evento disponível no momento.</Text> : events.map((evento) => (
           <Pressable
-            key={evento.id}
-            onPress={() => handleOpenLink(evento.linkMaisInfo)}
+            key={evento._id}
+            onPress={() => handleOpenLink(evento.linkEvento)}
             className="bg-white rounded-[28px] overflow-hidden mb-10 shadow-sm border border-gray-100"
           >
         
             <View className="w-full h-52 relative">
               <Image
-                source={{ uri: evento.fotoUrl }}
+                source={getImageUrl(evento.imagem) ? { uri: getImageUrl(evento.imagem) } : undefined}
                 className="w-full h-full"
                 resizeMode="cover"
               />
@@ -88,23 +81,23 @@ export default function EventsScreen() {
               <View className="flex-row items-center mb-2">
                 <Ionicons name="calendar-outline" size={18} color="#1F2937" />
                 <Text className="text-gray-900 font-bold text-sm ml-2">
-                  {evento.dataHora}
+                  {new Date(evento.data).toLocaleDateString('pt-BR')}
                 </Text>
               </View>
 
               <Text className="text-gray-900 font-bold text-xl leading-7 mb-2">
-                {evento.titulo}
+                {evento.tipo_Evento}
               </Text>
 
               <View className="flex-row items-center mb-3">
                 <Ionicons name="location-outline" size={18} color="#4B5563" />
                 <Text className="text-gray-600 text-sm ml-1.5 flex-1">
-                  {evento.local}
+                  {evento.texto}
                 </Text>
               </View>
 
               <Text className="text-gray-500 text-xs leading-5">
-                {evento.descricao}
+                {evento.texto}
               </Text>
             </View>
           </Pressable>

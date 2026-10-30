@@ -89,6 +89,17 @@ export function Header({
                   </TouchableOpacity>
 
                   <TouchableOpacity
+                    className="flex-row items-center p-3 rounded-xl active:bg-gray-50"
+                    onPress={() => {
+                      setIsMenuOpen(false);
+                      router.push('/parceiros');
+                    }}
+                  >
+                    <Ionicons name="people-outline" size={20} color="#4A3728" />
+                    <Text className="ml-3 font-medium text-gray-800 text-sm">Parceiros</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
                     className="flex-row items-center p-3 rounded-xl active:bg-orange-50"
                     onPress={() => {
                       setIsMenuOpen(false),

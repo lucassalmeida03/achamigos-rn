@@ -11,6 +11,7 @@ export type Animal = {
   sexo: string;
   porte?: string;
   peso?: number | string;
+  castracao?: boolean;
   observacoes?: string;
   linkAnimal?: string;
   imagem?: string | null;
@@ -185,4 +186,59 @@ export async function createAnimal(data: PetFormData) {
   }
 
   return response.json();
+}
+
+export async function getAnimal(id: string): Promise<Animal> {
+  const response = await fetch(`${API_URL}/animais/${id}`);
+  if (!response.ok) throw new Error('Não foi possível carregar o animal.');
+  return response.json();
+}
+
+export async function getMyAnimals(): Promise<Animal[]> {
+  const session = await getAuthSession();
+  const userId = session?.user?._id ?? session?.user?.id;
+  if (!userId) throw new Error('Sua sessão expirou. Faça login novamente.');
+  const animals = await getAnimals();
+  return animals.filter((animal) => {
+    const candidate = (animal as Animal & { userId?: string; user?: { _id?: string } });
+    return candidate.userId === userId || candidate.user?._id === userId;
+  });
+}
+
+export type UpdateAnimalData = {
+  nome: string;
+  idade: number;
+  raca: string;
+  sexo: string;
+  porte: string;
+  peso: number | string;
+  castracao: boolean;
+  observacoes?: string;
+  linkAnimal?: string;
+  tipo?: string;
+};
+
+export async function updateAnimal(id: string, data: UpdateAnimalData) {
+  const session = await getAuthSession();
+  if (!session) throw new Error('Sua sessão expirou. Faça login novamente.');
+  const response = await fetch(`${API_URL}/animais/${id}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${session.token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) throw new Error('Não foi possível atualizar o animal.');
+  return response.json();
+}
+
+export async function deleteAnimal(id: string) {
+  const session = await getAuthSession();
+  if (!session) throw new Error('Sua sessão expirou. Faça login novamente.');
+  const response = await fetch(`${API_URL}/animais/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${session.token}` },
+  });
+  if (!response.ok) throw new Error('Não foi possível excluir o animal.');
 }
