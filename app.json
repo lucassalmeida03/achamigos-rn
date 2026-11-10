@@ -4,10 +4,11 @@
     "slug": "achamigos-rn",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logocerto.png",
+    "icon": "./assets/images/icon.png",
     "scheme": "achamigosrn",
     "userInterfaceStyle": "automatic",
     "android": {
+      "package": "com.achamigos.app",
       "predictiveBackGestureEnabled": false
     },
     "web": {
@@ -28,6 +29,16 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "ac573929-2649-4219-b2a8-a58c42a5c98b"
+      }
     }
   }
 }
