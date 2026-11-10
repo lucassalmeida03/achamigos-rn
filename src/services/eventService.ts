@@ -1,5 +1,6 @@
 import { getAuthSession } from './authStorage';
 import { API_ORIGIN, API_URL } from '../constants/api';
+import { Platform } from 'react-native';
 
 export type EventItem = {
   _id: string;
@@ -55,10 +56,23 @@ export async function createEvent(data: CreateEventData) {
   body.append('linkEvento', data.linkExterno ?? '');
 
   if (data.bannerUrl) {
-    const imageResponse = await fetch(data.bannerUrl);
-    if (!imageResponse.ok) throw new Error('Não foi possível ler o banner selecionado.');
-    const blob = await imageResponse.blob();
-    body.append('imagem', blob, `evento-${Date.now()}.jpg`);
+    const fileName = `evento-${Date.now()}.jpg`;
+
+    if (Platform.OS === 'web') {
+      const imageResponse = await fetch(data.bannerUrl);
+      if (!imageResponse.ok) throw new Error('Não foi possível ler o banner selecionado.');
+      const blob = await imageResponse.blob();
+      body.append('imagem', blob, fileName);
+    } else {
+      body.append(
+        'imagem',
+        {
+          uri: data.bannerUrl,
+          name: fileName,
+          type: 'image/jpeg',
+        } as unknown as Blob,
+      );
+    }
   }
 
   const response = await fetch(`${API_URL}/eventos`, {

@@ -1,4 +1,4 @@
-const API_URL = 'http://192.168.15.9:3002/api';
+import { API_URL } from '../constants/api';
 
 export type CreateUserData = {
   nome: string;

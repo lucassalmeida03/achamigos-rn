@@ -4,7 +4,7 @@
     "slug": "achamigos-rn",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.svg",
+    "icon": "./assets/images/logocerto.png",
     "scheme": "achamigosrn",
     "userInterfaceStyle": "automatic",
     "android": {
@@ -12,7 +12,7 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/icon.svg"
+      "favicon": "./assets/images/logocerto.png"
     },
     "plugins": [
       "expo-router",
@@ -20,7 +20,7 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#FF7A00",
-          "image": "./assets/icon.svg",
+          "image": "./assets/images/logocerto.png",
           "imageWidth": 120
         }
       ]

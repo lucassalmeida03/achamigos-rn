@@ -102,7 +102,7 @@ export function Header({
                   <TouchableOpacity
                     className="flex-row items-center p-3 rounded-xl active:bg-orange-50"
                     onPress={() => {
-                      setIsMenuOpen(false),
+                      setIsMenuOpen(false);
                       router.push('/cadastrar-evento');
                     }}
                   >
