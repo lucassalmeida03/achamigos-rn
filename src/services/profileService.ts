@@ -19,8 +19,7 @@ export type ProfileData = {
 
 async function request(path: string, init?: RequestInit) {
   const session = await getAuthSession();
-  const userId = session?.user?._id ?? session?.user?.id;
-  if (!session || !userId) throw new Error('Sua sessão expirou. Faça login novamente.');
+  if (!session) throw new Error('Sua sessão expirou. Faça login novamente.');
 
   const response = await fetch(`${API_URL}${path}`, {
     ...init,
@@ -34,20 +33,17 @@ async function request(path: string, init?: RequestInit) {
   return response.json();
 }
 
-export async function getProfile() {
+export async function getProfile(): Promise<ProfileData> {
   const session = await getAuthSession();
   const userId = session?.user?._id ?? session?.user?.id;
-  if (!userId) throw new Error('Sua sessão expirou. Faça login novamente.');
-  const response = await fetch(`${API_URL}/users/${userId}`, {
-    headers: { Authorization: `Bearer ${session?.token ?? ''}` },
-  });
-  if (!response.ok) throw new Error('Não foi possível carregar o perfil.');
-  return response.json() as Promise<ProfileData>;
+  if (!session || !userId) throw new Error('Sua sessão expirou. Faça login novamente.');
+
+  return session.user as ProfileData;
 }
 
 export async function updateProfile(data: ProfileData) {
   const session = await getAuthSession();
   const userId = session?.user?._id ?? session?.user?.id;
-  if (!userId) throw new Error('Sua sessão expirou. Faça login novamente.');
+  if (!session || !userId) throw new Error('Sua sessão expirou. Faça login novamente.');
   return request(`/users/${userId}`, { method: 'PUT', body: JSON.stringify(data) });
 }

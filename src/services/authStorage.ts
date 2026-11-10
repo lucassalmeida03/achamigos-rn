@@ -3,10 +3,23 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const SESSION_KEY = '@achamigos/session';
 
 export type AuthSession = {
-  token: string;
+  token?: string;
   user: {
     _id?: string;
     id?: string;
+    nome?: string;
+    telefone?: string;
+    cnpj?: string;
+    userLogin?: string;
+    senha?: string;
+    email?: string;
+    endereco?: {
+      cep?: string;
+      rua?: string;
+      cidade?: string;
+      numero?: string;
+    };
+    linkUser?: string;
   };
 };
 
@@ -24,7 +37,7 @@ export async function getAuthSession(): Promise<AuthSession | null> {
   try {
     const session = JSON.parse(rawSession) as AuthSession;
 
-    if (!session.token) {
+    if (!session.user || (!session.user._id && !session.user.id)) {
       return null;
     }
 

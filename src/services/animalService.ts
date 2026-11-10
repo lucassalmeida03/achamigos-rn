@@ -1,6 +1,8 @@
 import { getAuthSession } from './authStorage';
 import type { PetFormData } from '../schemas/petSchema';
 import { API_ORIGIN, API_URL } from '../constants/api';
+import { fetch as expoFetch } from 'expo/fetch';
+import { File } from 'expo-file-system';
 import { Platform } from 'react-native';
 
 export type Animal = {
@@ -36,16 +38,6 @@ function getUserIdFromToken(token: string) {
   } catch {
     return undefined;
   }
-}
-
-function getImageType(uri: string) {
-  const extension = uri.split(/[?#]/)[0].split('.').pop()?.toLowerCase();
-
-  if (extension === 'png') {
-    return 'image/png';
-  }
-
-  return 'image/jpeg';
 }
 
 function getImageExtension(uri: string, fileName?: string) {
@@ -103,7 +95,10 @@ export async function createAnimal(data: PetFormData) {
     throw new Error('Sua sessão expirou. Faça login novamente.');
   }
 
-  const userId = session.user?._id ?? session.user?.id ?? getUserIdFromToken(session.token);
+  const userId =
+    session.user?._id ??
+    session.user?.id ??
+    (session.token ? getUserIdFromToken(session.token) : undefined);
 
   if (!userId) {
     throw new Error('Não foi possível identificar o usuário da sessão.');
@@ -127,49 +122,48 @@ export async function createAnimal(data: PetFormData) {
     const fileName = data.fotoNome?.includes('.')
       ? data.fotoNome
       : `${data.fotoNome ?? `animal-${Date.now()}`}.${extension}`;
-    const fileType = data.fotoTipo ?? getImageType(data.fotoUri);
-
     if (Platform.OS === 'web') {
       let imageResponse: Response;
 
       try {
-        imageResponse = await fetch(data.fotoUri);
+        imageResponse = await expoFetch(data.fotoUri);
       } catch {
         throw new Error('Não foi possível ler a imagem selecionada.');
       }
 
-      if (!imageResponse.ok) {
-        throw new Error('Não foi possível ler a imagem selecionada.');
-      }
-
       const imageBlob = await imageResponse.blob();
+      if (imageBlob.size === 0) {
+        throw new Error('A imagem selecionada está vazia ou indisponível.');
+      }
       body.append('imagem', imageBlob, fileName);
     } else {
-      body.append(
-        'imagem',
-        {
-          uri: data.fotoUri,
-          name: fileName,
-          type: fileType,
-        } as unknown as Blob,
-      );
+      const imageFile = new File(data.fotoUri);
+      if (!imageFile.exists) {
+        throw new Error('A imagem selecionada não está mais disponível.');
+      }
+      body.append('imagem', imageFile);
     }
   }
 
   let response: Response;
 
   try {
-    response = await fetch(`${API_URL}/animais`, {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    response = await expoFetch(`${API_URL}/animais`, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${session.token}`,
-      },
       body,
+      signal: controller.signal,
     });
-  } catch {
-    throw new Error(
-      'Não foi possível conectar ao backend. Verifique sua internet e tente novamente.',
-    );
+    clearTimeout(timeout);
+  } catch (error) {
+    const reason =
+      error instanceof DOMException && error.name === 'AbortError'
+        ? 'A conexão com o backend expirou.'
+        : error instanceof Error && error.message
+          ? error.message
+          : 'Falha de rede no dispositivo.';
+    throw new Error(`Não foi possível cadastrar o animal: ${reason} (${API_URL}/animais)`);
   }
 
   if (!response.ok) {
